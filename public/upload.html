@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <form method="POST" enctype="multipart/form-data"  class="needs-validation" novalidate id="upload_form">
+        <div class="form-group">
+            <label for="name">Username:</label>
+            <input type="text" class="form-control" id="name" placeholder="Enter username" name="name" required>
+            <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <div class="form-group">
+            <label for="file">File:</label>
+            <input id="file" type="file" class="form-control-file border" name="file" accept="video/.*" multiple required>
+            <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+
+        <button id="button" type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+<script>
+
+    // Disable form submissions if there are invalid fields
+    /*
+    (function() {
+
+        'use strict';
+        window.addEventListener('load', function() {
+            // Get the forms we want to add validation styles to
+            let forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    */
+
+    $(document).on("submit", "#upload_form", function(e){
+        e.preventDefault();
+
+
+        //var form=$("#upload_form").serialize();
+
+        let fd = new FormData();
+        //fd.set("values",form);
+        let files = $('#file')[0].files[0];
+
+        fd.append("file", files);
+
+        $.ajax({
+            url: '/api/media',
+            type: 'POST',
+            data: fd,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+
+            success: function(response){
+                alert(response.id)
+                alert(response.message)
+
+            },
+            error: function(xhr, status, error) {
+                var data= xhr.responseText;
+                var response= JSON.parse(data);
+                alert(response['error']);
+            }
+        },true);
+        return true;
+    });
+
+</script>
+
+</body>
+</html>
+
