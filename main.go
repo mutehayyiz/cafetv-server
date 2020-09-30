@@ -45,16 +45,6 @@ func main() {
 	}
 }
 
-func serverFile(w http.ResponseWriter, req * http.Request) {
-	path:=req.URL.Path[1:]
-
-	http.ServeFile(w, req, "./public/"+path)
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, fmt.Sprintf("./%s/index.html", "./public"))
-}
-
 func GenerateRouter() *mux.Router {
 	r := mux.NewRouter()
 	// Endpoints called by product owners
@@ -65,23 +55,32 @@ func GenerateRouter() *mux.Router {
 
 	r.HandleFunc("/api/media", AddMedia).Methods(http.MethodPost)
 
+
+	// media
+
 	r.HandleFunc("/api/media", GetAllMedias).Methods(http.MethodGet)
 	r.HandleFunc("/api/media/{id}", GetMediaByID).Methods(http.MethodGet)
-	r.HandleFunc("/api/media/category/{category}", GetMediaByCategory).Methods(http.MethodGet)
+	r.HandleFunc("/api/category/{category}", GetMediaByCategory).Methods(http.MethodGet)
 
-//	r.HandleFunc("/api/media/{id}", Update).Methods(http.MethodPut)
+	r.HandleFunc("/api/category", GetCategories).Methods(http.MethodGet)
 
-	r.HandleFunc("/api/media/{id}/delete", DeleteMedia).Methods(http.MethodDelete)
+	r.HandleFunc("/api/media/{id}", Update).Methods(http.MethodPut)
+
+	r.HandleFunc("/api/media/{id}/delete", DeleteMediaByID).Methods(http.MethodDelete)
 	r.HandleFunc("/api/media/delete", DeleteAllMedias).Methods(http.MethodDelete)
+
+
+	// admins
+
 
 	adminRouter := r.PathPrefix("/admin").Subrouter()
 	//adminRouter.Use(AuthenticationMiddleware)
-	adminRouter.HandleFunc("/media", GetAllMedias).Methods(http.MethodGet)
-	adminRouter.HandleFunc("/media", AddMedia).Methods(http.MethodPost)
-	adminRouter.HandleFunc("/media/{id}", GetMediaByID).Methods(http.MethodGet)
-	adminRouter.HandleFunc("/media/{id}/delete", DeleteMedia).Methods(http.MethodDelete)
+	adminRouter.HandleFunc("/admin/media", GetAllMedias).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/admin/media", AddMedia).Methods(http.MethodPost)
+	adminRouter.HandleFunc("/admin/media/{id}", GetMediaByID).Methods(http.MethodGet)
+	adminRouter.HandleFunc("/admin/media/{id}/delete", DeleteMediaByID).Methods(http.MethodDelete)
 
-	r.HandleFunc("/license/ping", Ping).Methods(http.MethodPost)
+	r.HandleFunc("/api/ping", Ping).Methods(http.MethodPost)
 
 	return r
 }

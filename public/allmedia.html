@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="cols">
+
+        <div class="col-sm-2">
+
+            <div id="button_container" class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+            </div>
+
+        </div>
+        <div class="col-sm-8">
+            <div class="table-responsive" id="videos" style="display: block;">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col"><span class="glyphicon glyphicon-user"></span></th>
+                        <th scope="col"><span class="glyphicon glyphicon-time"></span></th>
+                        <th scope="col"><span class="glyphicon glyphicon-time"></span></th>
+                        <th scope="col"><i class="glyphicon glyphicon-map-marker"></i></th>
+                        <th scope="col">işlem</th>
+                    </tr>
+                    </thead>
+                    <tbody  id="tbody">
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="video_container">
+
+            </div>
+
+        </div>
+
+        <div class="col-sm-2">
+            <div class="container">
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">Upload</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+    <script>
+
+        $(document).ready(function (){
+            $.ajax({
+                type: "GET",
+                url: "/api/category",
+                dataType: "json",
+                success: function (response){
+                    var html=
+                        `
+                        <button type="button" class="btn btn-default" name="btn-list" id="getAll">Get All Media</button>
+                        `;
+
+                    for (res in response ){
+                        var category=response[res].category;
+                        html+=
+                            `
+                                <button type="button" class="btn btn-default" name="btn-list" id="`+category+`">`+category+`</button>
+
+                        `;
+                    }
+                    html+=
+                        `
+                            <script src="/static/js/list.js"/>
+                        `;
+                    $("#button_container").html(html);
+                }
+            });
+        });
+
+    </script>
+
+
+
+</body>
+</html>

@@ -22,11 +22,16 @@ type Handler interface {
 	GetByID(id string, m * media.Media) error
 	GetByCategory(category string, medias *[]*media.Media) error
 	GetAll(medias *[]*media.Media) error
+	GetCategories(categories *[]*string) error
 
 	Update(id string, l *media.Media) error
 
 	DeleteByID(id string) error
 	DeleteAll() error
+
+
+
+
 	DropDatabase() error
 }
 
@@ -49,7 +54,6 @@ type mediaMongoHandler struct {
 	col *mongo.Collection
 }
 
-
 func (m mediaMongoHandler) AddIfNotExists(l *media.Media)  error {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
@@ -66,7 +70,6 @@ func (m mediaMongoHandler) AddIfNotExists(l *media.Media)  error {
 
 		return  errors.New(fmt.Sprintf("there is already such media with ID: %s", existingMedia.ID.Hex()))
 	}
-
 
 	update := bson.M{"$set": l}
 	_, err = m.col.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
@@ -95,7 +98,7 @@ func (m mediaMongoHandler) GetByID(id string, l *media.Media) error {
 }
 
 func (m mediaMongoHandler) GetByCategory(category string, medias *[]*media.Media) error {
-	cur, err := m.col.Find(context.Background(), bson.M{"category": media.Category(category)})
+	cur, err := m.col.Find(context.Background(), bson.M{"category": category})
 	if err != nil {
 		return err
 	}
@@ -111,7 +114,6 @@ func (m mediaMongoHandler) GetByCategory(category string, medias *[]*media.Media
 		}
 
 		*medias = append(*medias, &l)
-
 	}
 
 	return cur.Err()
@@ -140,6 +142,36 @@ func (m mediaMongoHandler) GetAll(medias *[]*media.Media) error {
 	return cur.Err()
 }
 
+func (m mediaMongoHandler) GetCategories(categories *[]*string) error{
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	projection := &bson.M{"category":1, "_id":0}
+	cur, err := m.col.Find(ctx,bson.D{}, options.Find().SetProjection(projection))
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return err
+		}
+	}
+
+	defer cur.Close(context.Background())
+
+	for cur.Next(context.Background()) {
+
+		var c *string
+		err := cur.Decode(c)
+		if err != nil {
+			fmt.Println("this is an error decode")
+			return err
+		}
+
+		*categories = append(*categories, c)
+	}
+
+	return cur.Err()
+}
+
+
+
 func (m mediaMongoHandler) Update(id string, l *media.Media) error {
 	licenseID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -164,6 +196,7 @@ func (m mediaMongoHandler) Update(id string, l *media.Media) error {
 
 	return nil
 }
+
 
 
 func (m mediaMongoHandler) DeleteByID(id string) error {

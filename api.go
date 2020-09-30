@@ -18,10 +18,11 @@ import (
 	"strconv"
 )
 
+
+//Media
+
 func AddMedia(w http.ResponseWriter, req *http.Request) {
-
 	//parse form and get file
-
 	err:= req.ParseForm()
 	if err != nil{
 		ReturnError(w, http.StatusInternalServerError, err.Error())
@@ -52,7 +53,7 @@ func AddMedia(w http.ResponseWriter, req *http.Request) {
 	l.Name= handle.Filename
 	l.Hash= hex.EncodeToString(hasher.Sum(nil))
 	l.ID=primitive.NewObjectID()
-	l.Category= media.Category(req.FormValue("category"))
+	l.Category= string(req.FormValue("category"))
 	l.MediaType= media.Type(req.FormValue("mediaType"))
 	l.Description= req.FormValue("description")
 	l.Online, _ = strconv.ParseBool(req.FormValue("online"))
@@ -90,6 +91,16 @@ func AddMedia(w http.ResponseWriter, req *http.Request) {
 	})
 }
 
+func GetAllMedias(w http.ResponseWriter, r *http.Request) {
+	var medias []*media.Media
+	err := storage.MediaHandler.GetAll(&medias)
+	if err != nil {
+		ReturnError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	ReturnResponse(w, 200, medias)
+}
+
 func GetMediaByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
@@ -114,34 +125,31 @@ func GetMediaByCategory(w http.ResponseWriter, r *http.Request) {
 	ReturnResponse(w, 200, medias)
 }
 
-func GetAllMedias(w http.ResponseWriter, r *http.Request) {
-	var medias []*media.Media
-	err := storage.MediaHandler.GetAll(&medias)
+
+func GetCategories(w http.ResponseWriter, r *http.Request){
+
+	var categories []*string
+
+	err := storage.MediaHandler.GetCategories(&categories)
 	if err != nil {
 		ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ReturnResponse(w, 200, medias)
+
+
+	ReturnResponse(w, 200, categories)
+
 }
-/*
+
+
 func Update(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-	//online:= bool( mux.Vars(r)["online"])
-
-	err := storage.MediaHandler.Update(id)
-
-	if err != nil {
-		ReturnError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
 
 	ReturnResponse(w, 200,  map[string]interface{}{
 		"message": "Media successfully updated",
 	})
 }
-*/
 
-func DeleteMedia(w http.ResponseWriter, r *http.Request) {
+func DeleteMediaByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
 	var m media.Media
@@ -150,7 +158,7 @@ func DeleteMedia(w http.ResponseWriter, r *http.Request) {
 		ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	path := "public/media/" + string(m.Category) + "/" + m.Name
+	path := "public/media/" + m.Category + "/" + m.Name
 	fmt.Println(path)
 	err = os.Remove(path)
 	if err != nil {
@@ -185,11 +193,17 @@ func DeleteAllMedias(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+//medias
+
+// others
+
 func Ping(w http.ResponseWriter, r *http.Request) {
+	ReturnResponse(w, 200, map[string]interface{}{"naber":"ok"})
 
 }
 
 func ReturnResponse(w http.ResponseWriter, statusCode int, resp interface{}) {
+
 	bytes, _ := json.Marshal(resp)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -221,3 +235,4 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
