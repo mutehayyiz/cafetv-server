@@ -53,7 +53,7 @@ func AddMedia(w http.ResponseWriter, req *http.Request) {
 	l.Name= handle.Filename
 	l.Hash= hex.EncodeToString(hasher.Sum(nil))
 	l.ID=primitive.NewObjectID()
-	l.Category= string(req.FormValue("category"))
+	l.Category= req.FormValue("category")
 	l.MediaType= media.Type(req.FormValue("mediaType"))
 	l.Description= req.FormValue("description")
 	l.Online, _ = strconv.ParseBool(req.FormValue("online"))
@@ -128,14 +128,13 @@ func GetMediaByCategory(w http.ResponseWriter, r *http.Request) {
 
 func GetCategories(w http.ResponseWriter, r *http.Request){
 
-	var categories []*string
+	var categories interface{}
 
 	err := storage.MediaHandler.GetCategories(&categories)
 	if err != nil {
 		ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 
 	ReturnResponse(w, 200, categories)
 
@@ -159,7 +158,6 @@ func DeleteMediaByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	path := "public/media/" + m.Category + "/" + m.Name
-	fmt.Println(path)
 	err = os.Remove(path)
 	if err != nil {
 		ReturnError(w, http.StatusInternalServerError, err.Error())
@@ -187,6 +185,12 @@ func DeleteAllMedias(w http.ResponseWriter, r *http.Request) {
 		ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	path := "public/media"
+	err = os.RemoveAll(path)
+	if err != nil {
+		ReturnError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	ReturnResponse(w, 200, map[string]interface{}{
 		"message": "All media successfully deleted",
@@ -205,6 +209,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 func ReturnResponse(w http.ResponseWriter, statusCode int, resp interface{}) {
 
 	bytes, _ := json.Marshal(resp)
+	enableCors(&w)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
@@ -236,3 +241,10 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func handler(w http.ResponseWriter, req *http.Request) {
+	enableCors(&w)
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}

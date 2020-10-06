@@ -55,7 +55,6 @@ func GenerateRouter() *mux.Router {
 
 	r.HandleFunc("/api/media", AddMedia).Methods(http.MethodPost)
 
-
 	// media
 
 	r.HandleFunc("/api/media", GetAllMedias).Methods(http.MethodGet)

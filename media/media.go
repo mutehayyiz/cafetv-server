@@ -11,7 +11,6 @@ func fatalf(format string, err error) {
 	}
 }
 
-
 type Media struct {
 	ID        	primitive.ObjectID     	`bson:"_id,omitempty" json:"id"`
 	Name 		string					`bson:"name,omitempty" json:"name"`
