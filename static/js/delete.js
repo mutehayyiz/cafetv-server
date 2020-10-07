@@ -8,12 +8,12 @@ $('button[name="display"]').on("click",function() {
 
     var html="";
 
-    if(mediaType!= "video") {
+    if(mediaType== "video") {
 
         html = `
             <video width="400" controls name="video">
                 <source id="source" src="http://localhost:4242/public/media/` + category + `/` + name + `" type="video/mp4">
-                    Your browser does not support HTML video.
+                    Your browser does not support HTML video.</source>
             </video>
             `;
     }else{

@@ -22,7 +22,7 @@ type Handler interface {
 	GetByID(id string, m * media.Media) error
 	GetByCategory(category string, medias *[]*media.Media) error
 	GetAll(medias *[]*media.Media) error
-	GetCategories(categories *[]*string) error
+	GetCategories(categories *interface{}) error
 
 	Update(id string, l *media.Media) error
 
@@ -134,7 +134,6 @@ func (m mediaMongoHandler) GetAll(medias *[]*media.Media) error {
 		if err != nil {
 			return err
 		}
-
 		*medias = append(*medias, &l)
 
 	}
@@ -142,35 +141,20 @@ func (m mediaMongoHandler) GetAll(medias *[]*media.Media) error {
 	return cur.Err()
 }
 
-func (m mediaMongoHandler) GetCategories(categories *[]*string) error{
+func (m mediaMongoHandler) GetCategories(categories * interface{}) error{
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
-	projection := &bson.M{"category":1, "_id":0}
-	cur, err := m.col.Find(ctx,bson.D{}, options.Find().SetProjection(projection))
-	if err != nil {
-		if err != mongo.ErrNoDocuments {
-			return err
-		}
+	//projection := &bson.M{"category":1, "_id":0}
+	//cur, err := m.col.Find(ctx,bson.D{}, options.Find().SetProjection(projection))
+
+	res, err :=  m.col.Distinct(ctx,"category", bson.D{{}})
+	if err != nil{
+		return errors.New("there is no document")
 	}
+	*categories= res
 
-	defer cur.Close(context.Background())
-
-	for cur.Next(context.Background()) {
-
-		var c *string
-		err := cur.Decode(c)
-		if err != nil {
-			fmt.Println("this is an error decode")
-			return err
-		}
-
-		*categories = append(*categories, c)
-	}
-
-	return cur.Err()
+	return nil
 }
-
-
 
 func (m mediaMongoHandler) Update(id string, l *media.Media) error {
 	licenseID, err := primitive.ObjectIDFromHex(id)
@@ -196,8 +180,6 @@ func (m mediaMongoHandler) Update(id string, l *media.Media) error {
 
 	return nil
 }
-
-
 
 func (m mediaMongoHandler) DeleteByID(id string) error {
 	licenseID, err := primitive.ObjectIDFromHex(id)

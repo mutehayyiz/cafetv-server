@@ -9,9 +9,28 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+        <!--text-align
+
+        #text{
+            text-align: justify;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+    </style>
+    <script src="/static/js/list.js"></script>
 
 </head>
 <body>
+
+
+
+<div class="jumbotron">
+
+
+</div>
 
 <div class="container">
     <div class="cols">
@@ -57,6 +76,69 @@
 </div>
 
 
+
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+
+            <!--Modal header-->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Dosya Ekle</h4>
+            </div>
+
+            <!--Modal body--->
+            <form id="upload_form" method="POST" enctype="multipart/form-data" name="upload_form" class="form-horizontal needs-validation" novalidate id="upload_form">
+
+                <div class="modal-body">
+
+                    <div class="form-group form-group-lg" >
+                        <label class="col-sm-3" for="sel1">Select list:</label>
+                        <div class="col-sm-9">
+
+                            <select class="form-control" id="sel1">
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                            </select>
+                        </div>
+
+
+                    </div>
+                    <div class="form-group form-group-lg" >
+                        <label class="col-sm-3" for="messagetext">Description: </label>
+                        <div class="col-sm-9">
+                            <input type="hidden">
+                            <input id="textarea" class="form-control"  id="description" name="description"  placeholder="..." required >
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-lg" >
+                        <label class="col-sm-3" for="file">File:</label>
+                        <div class="col-sm-9">
+                            <input id="file" type="file" class="form-control-file" name="file" accept="video/.*" multiple required>
+                            <div class="invalid-feedback">Please fill out this field.</div>
+                        </div>
+                    </div>
+
+
+                    <!--Modal Footer-->
+                    <div class="modal-footer">
+                        <button id="btn" name="button" type="submit" class="btn btn-default">Gönder</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
     <script>
 
         $(document).ready(function (){
@@ -71,7 +153,7 @@
                         `;
 
                     for (res in response ){
-                        var category=response[res].category;
+                        var category=response[res];
                         html+=
                             `
                                 <button type="button" class="btn btn-default" name="btn-list" id="`+category+`">`+category+`</button>
@@ -88,8 +170,5 @@
         });
 
     </script>
-
-
-
 </body>
 </html>
